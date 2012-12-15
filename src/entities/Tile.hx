@@ -17,6 +17,7 @@ class Tile extends Entity
   public var resourceValue : Int = 30;
   public var conservationValue : Int = 30;
   public var resKnown : Bool = false;
+  public var explode : Bool = false;
 
   public function new(x, y : Int)
   {
@@ -35,10 +36,10 @@ class Tile extends Entity
     layer = 10;
 
     conservationValue = Std.random(100);
-    resourceValue = Std.random(2*conservationValue + 100);
+    resourceValue = Std.random(2*conservationValue);
 
     if(Std.random(10) == 0) {
-      resourceValue = 0;
+      explode = true;
     }
 
     graphic = outline;

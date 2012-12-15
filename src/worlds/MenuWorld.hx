@@ -17,9 +17,12 @@ import clash.Checkbox;
 import clash.RadioButton;
 import clash.Handle;
 
+import entities.Cursor;
+
 class MenuWorld extends World
 {
   var background : Image;
+  var cursor : Cursor;
   private var _currentClash : Clash;
 
   public function new()
@@ -30,6 +33,8 @@ class MenuWorld extends World
 
   public override function begin()
   {
+
+    flash.ui.Mouse.show();
     background = new Image("gfx/menu.png");
     background.originX = background.width/2;
     background.originY = background.height/2;

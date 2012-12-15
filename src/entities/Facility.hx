@@ -8,7 +8,7 @@ import com.haxepunk.graphics.Emitter;
 class Facility extends Entity
 {
   public static inline var PAYOUT_TIMER : Int = 5;
-  public static inline var UPKEEP : Int = 50;
+  public static inline var UPKEEP : Int = 100;
 
   public static var smogLevel : Int;
 

@@ -1,4 +1,4 @@
- package worlds;
+package worlds;
 
 import nme.Assets;
 import nme.geom.Point;
@@ -53,6 +53,8 @@ class GameWorld extends World
   var cursor : Cursor;
   var grid : ResourceGrid;
   var probe : Probe;
+  var bankrupt : Bool = false;
+  var bankruptImg : Image;
 
   public function new()
   {
@@ -62,6 +64,8 @@ class GameWorld extends World
 
   public override function begin()
   {
+    flash.ui.Mouse.hide();
+
     background = new Image("gfx/world_map.png");
 
     addGraphic(background).layer = 100;
@@ -75,12 +79,12 @@ class GameWorld extends World
     add(l);
 
     var b = new Button(160, 0, _currentClash,
-                       "Default", "Probe ($50/tile)", ProbeCallback);
+                       "Default", "Probe Region\n$50/tile", ProbeCallback);
     buttons.push(b);
     add(b);
 
     b = new Button(310, 0, _currentClash,
-                   "Default", "Build Rig ($500)", ConstructRigCallback);
+                   "Default", "Build Rig\n$500", ConstructRigCallback);
     buttons.push(b);
     add(b);
 
@@ -94,8 +98,6 @@ class GameWorld extends World
 
     add(tmx);
 
-    flash.ui.Mouse.hide();
-
     cursor = new Cursor(mouseX, mouseY);
 
     add(cursor);
@@ -108,6 +110,13 @@ class GameWorld extends World
     coffers = 5000;
 
     grid = new ResourceGrid(background.width, background.height);
+
+    bankruptImg = new Image("gfx/gameover.png");
+    bankruptImg.visible = false;
+    bankruptImg.x = HXP.halfWidth;
+    bankruptImg.y = HXP.halfHeight;
+
+    addGraphic(bankruptImg).layer = 0;
 
     camera.x = HXP.halfWidth;
     camera.y = HXP.halfHeight;
@@ -134,51 +143,78 @@ class GameWorld extends World
       HXP.clamp(camera.y, 0, background.height);
     }
 
+    if(coffers < 0) {
+      bankrupt = true;
+      bankruptImg.visible = true;
+      bankruptImg.x = Std.int(HXP.halfWidth - bankruptImg.width/2 +
+                              HXP.camera.x);
+      bankruptImg.y = Std.int(HXP.halfHeight- bankruptImg.height/2 +
+                              HXP.camera.y);
+    }
+
     var curTile : Tile = cast(collidePoint("tile", mouseX, mouseY),Tile);
     if(curTile != null) {
       curTile.selected = true;
     }
-
-    if(Input.mousePressed) {
-      switch(mouseState) {
-      case PLACE_OILRIG:
-        if(collidePoint("collide", mouseX, mouseY) != null) {
-          if(coffers - OilRig.BUILD_COST > 0) {
-            if(curTile != null && curTile.facility == null) {
-              var fac = new OilRig(Std.random(100), curTile.x, curTile.y);
-              curTile.facility = fac;
-              add(fac);
-              coffers -= OilRig.BUILD_COST;
+    if(!bankrupt) {
+      if(Input.mousePressed) {
+        switch(mouseState) {
+        case PLACE_OILRIG:
+          if(collidePoint("collide", mouseX, mouseY) != null) {
+            if(coffers - OilRig.BUILD_COST > 0) {
+              if(curTile != null && curTile.facility == null) {
+                var fac = new OilRig(Std.random(100), curTile.x, curTile.y);
+                curTile.facility = fac;
+                add(fac);
+                coffers -= OilRig.BUILD_COST;
+              }
+            } else {
+              // No money
             }
-          } else {
-            // No money
+            mouseState = FREE;
           }
-          mouseState = FREE;
+        case PLACE_PROBE_PRE:
+          mouseState = PLACE_PROBE;
+          probe = new Probe(Std.int(mouseX / Tile.TILE_SIZE) * Tile.TILE_SIZE,
+                            Std.int(mouseY / Tile.TILE_SIZE) * Tile.TILE_SIZE);
+          add(probe);
+        case FREE:
+          //
+        case PLACE_PROBE:
+          //
         }
-      case PLACE_PROBE_PRE:
-        mouseState = PLACE_PROBE;
-        probe = new Probe(mouseX, mouseY);
-        add(probe);
-      case FREE:
-        //
-      case PLACE_PROBE:
-        //
+      }
+
+      if(Input.mouseDown && mouseState == PLACE_PROBE) {
+        probe.setEnd(mouseX, mouseY);
+      }
+
+      if(Input.mouseReleased && mouseState == PLACE_PROBE) {
+        var start = new Point(probe.x / Tile.TILE_SIZE,
+                              probe.y / Tile.TILE_SIZE);
+        var end = new Point(Std.int(probe.endPos.x / Tile.TILE_SIZE),
+                            Std.int(probe.endPos.y / Tile.TILE_SIZE));
+
+        var cost = (Std.int(end.x+1)-Std.int(start.x)) *
+          (Std.int(end.y+1)-Std.int(start.y)) * 50;
+
+        if(coffers - cost >= 0) {
+          var tiles = grid.tiles;
+
+          for(i in Std.int(start.x)...Std.int(end.x+1)) {
+            for(j in Std.int(start.y)...Std.int(end.y+1)) {
+              tiles[i][j].selected = true;
+              tiles[i][j].resKnown = true;
+            }
+          }
+          coffers -= cost;
+        }
+
+        remove(probe);
+        probe == null;
+        mouseState = FREE;
       }
     }
-
-    if(Input.mouseDown && mouseState == PLACE_PROBE) {
-      probe.setEnd(mouseX, mouseY);
-    }
-
-    if(Input.mouseReleased && mouseState == PLACE_PROBE) {
-
-
-      remove(probe);
-      probe == null;
-      mouseState = FREE;
-    }
-
-
     switch(mouseState) {
     case PLACE_OILRIG:
       cursor.image.play("rig");
@@ -199,7 +235,7 @@ class GameWorld extends World
           + Std.string(curTile != null ? curTile.conservationValue : 0)
           + "\nRES: " +
           (curTile != null ? (curTile.resKnown ?
-                             Std.string(curTile.conservationValue) : "???")
+                              Std.string(curTile.resourceValue) : "???")
            : "???");
       }
     }
