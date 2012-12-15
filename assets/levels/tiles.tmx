@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="36" height="24" tilewidth="20" tileheight="20">
+ <tileset firstgid="1" name="world" tilewidth="20" tileheight="20">
+  <image source="../gfx/world_map.png" width="720" height="480"/>
+ </tileset>
+ <layer name="ocean" width="36" height="24">
+  <data encoding="base64" compression="zlib">
+   eJzt1UEKACAIBMCgB/j/39axQ8lq5Eq44DGckkp6azLrZaTbKyqnngyLlvLoKY+eTB7WXUc9TFOGNxH1MEyZ/g7Uk9EUnfL842GE3X+XGw9ypta3xetBZoxa1vWemVn2+UMN+bsPVQ==
+  </data>
+ </layer>
+ <layer name="land" width="36" height="24">
+  <data encoding="base64" compression="zlib">
+   eJzdlllSwkAQhjN5xYVF5SC44z1wQ7wHboj3wA3xHrhbOQfuXsE/RabotD2ZGconu+p7CT3JRw/5hyAYVi0cMq2CIA8KoAhKYAbMquFnEqb+OVBWwVjlct+KgXmwMIZbpEbQss1F36tmYB1seLqtgFVQBWuCT8XhHk0De2CfuLnso82nprKd4usdA6fgjLjxfVwES2CZeNTBDmiAXcGnqdJOnPh638ANuCW9fB83wRbYTjz4bE4En45KO3Hi6wMDL+CVePN9PACH4Ai0hNlcCz59lXbixNdzocwEmAxH3nwfz8EFuATdxOkYtIXZaJ+BSjtxOir97Kn4nQR5UADFcOTN9/EO3IMH8Jg4XYGeMBtdOebE6Tv4uGSGT1ZSJ43LM3yg71jV4kOdXM+Cqif6HdO/Z5fKhekMcXUrs76/PNtohrjkm/7+tM9lDc9mU9EMseWbnn2D9flkoq1ohtjyTWdJm/X5ZKKtaIbY8k1nSY/1Za3xnQ89C2z59gSeE2hf1hqf+XB3fk69gXfwAT7BF/hOoH1Za7LOjIjMb0WAupmyuZRAMzwrz/mZQf8jRmR+dQE6V9N/zEj9xrV4f0Tm1xKgczU9Z1wXup6Wnl9XwHYWm77nf6gfdTLveA==
+  </data>
+ </layer>
+</map>
