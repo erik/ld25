@@ -7,7 +7,7 @@ class OilRig extends Facility
 {
   var spritemap : TiledSpritemap;
 
-  public function new(x, y : Float)
+  public function new(pay : Int, x, y : Float)
   {
     this.type = "oilrig";
 
@@ -18,6 +18,6 @@ class OilRig extends Facility
 
     this.graphic = spritemap;
 
-    super(x, y);
+    super(pay, x, y);
   }
 }
