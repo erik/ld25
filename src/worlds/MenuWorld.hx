@@ -31,7 +31,11 @@ class MenuWorld extends World
   public override function begin()
   {
     background = new Image("gfx/menu.png");
-    addGraphic(background);
+    background.originX = background.width/2;
+    background.originY = background.height/2;
+    background.x = background.width/2;
+    background.y = background.height/2;
+        addGraphic(background);
 
     add(new Button(HXP.width-225, HXP.halfHeight, _currentClash, "Default",
                    "Click to start", StartButtonCallback));

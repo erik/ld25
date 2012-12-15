@@ -1,6 +1,7 @@
  package worlds;
 
 import nme.Assets;
+import nme.geom.Point;
 
 import com.haxepunk.Engine;
 import com.haxepunk.HXP;
@@ -16,24 +17,28 @@ import com.haxepunk.masks.Grid;
 import com.haxepunk.tmx.TmxEntity;
 import com.haxepunk.tmx.TmxMap;
 
+import clash.data.Clash;
+import clash.data.ClashParser;
+import clash.Button;
+import clash.Label;
+import clash.Checkbox;
+import clash.RadioButton;
+import clash.Handle;
 
 import entities.Facility;
 import entities.ProcessingFacility;
 import entities.OilRig;
 import entities.Probe;
+import entities.ResourceGrid;
+import entities.Tile;
 
 import entities.Cursor;
-
-import clash.data.Clash;
-import clash.data.ClashParser;
-import clash.Button;
-import clash.Checkbox;
-import clash.RadioButton;
-import clash.Handle;
 
 enum MouseState {
   FREE;
   PLACE_OILRIG;
+  PLACE_PROBE_PRE;
+  PLACE_PROBE;
 }
 
 
@@ -42,11 +47,12 @@ class GameWorld extends World
 
   private var _currentClash : Clash;
   var background : Image;
-  var facilities : Array<Facility>;
-  var coffers : Int;
-  var buttons : Array<Button>;
+  public var coffers : Int;
+  public var buttons : Array<Button>;
   var mouseState : MouseState;
   var cursor : Cursor;
+  var grid : ResourceGrid;
+  var probe : Probe;
 
   public function new()
   {
@@ -57,19 +63,24 @@ class GameWorld extends World
   public override function begin()
   {
     background = new Image("gfx/world_map.png");
-    facilities = new Array<Facility>();
 
-    addGraphic(background);
+    addGraphic(background).layer = 100;
 
     buttons = new Array<Button>();
 
-    var b = new Button(0, 0, _currentClash,
-                       "Default", "Send Probe");
+    var l = new Label(0, 0, _currentClash, "Default",
+                      "000000000000\n000000000000\n000000000000");
+    l.type = "stats";
+    buttons.push(l);
+    add(l);
+
+    var b = new Button(160, 0, _currentClash,
+                       "Default", "Probe ($50/tile)", ProbeCallback);
     buttons.push(b);
     add(b);
 
-    b = new Button(0, 100, _currentClash,
-                   "Default", "Build Rig", ConstructRigCallback);
+    b = new Button(310, 0, _currentClash,
+                   "Default", "Build Rig ($500)", ConstructRigCallback);
     buttons.push(b);
     add(b);
 
@@ -93,6 +104,14 @@ class GameWorld extends World
     Input.define("right", [Key.RIGHT, Key.D]);
     Input.define("up",    [Key.UP, Key.W]);
     Input.define("down",  [Key.DOWN, Key.S]);
+
+    coffers = 5000;
+
+    grid = new ResourceGrid(background.width, background.height);
+
+    camera.x = HXP.halfWidth;
+    camera.y = HXP.halfHeight;
+
   }
 
   public override function update()
@@ -115,31 +134,79 @@ class GameWorld extends World
       HXP.clamp(camera.y, 0, background.height);
     }
 
+    var curTile : Tile = cast(collidePoint("tile", mouseX, mouseY),Tile);
+    if(curTile != null) {
+      curTile.selected = true;
+    }
+
     if(Input.mousePressed) {
       switch(mouseState) {
       case PLACE_OILRIG:
-        // bad area to place rig
         if(collidePoint("collide", mouseX, mouseY) != null) {
-          var fac = new OilRig(Std.random(30), mouseX-32, mouseY-32);
-          add(fac);
-          facilities.push(fac);
-          cursor.image.play("free");
+          if(coffers - OilRig.BUILD_COST > 0) {
+            if(curTile != null && curTile.facility == null) {
+              var fac = new OilRig(Std.random(100), curTile.x, curTile.y);
+              curTile.facility = fac;
+              add(fac);
+              coffers -= OilRig.BUILD_COST;
+            }
+          } else {
+            // No money
+          }
           mouseState = FREE;
         }
+      case PLACE_PROBE_PRE:
+        mouseState = PLACE_PROBE;
+        probe = new Probe(mouseX, mouseY);
+        add(probe);
       case FREE:
+        //
+      case PLACE_PROBE:
+        //
       }
     }
 
-    for(fac in facilities.iterator()) {
-      coffers += fac.getPayout();
+    if(Input.mouseDown && mouseState == PLACE_PROBE) {
+      probe.setEnd(mouseX, mouseY);
     }
 
+    if(Input.mouseReleased && mouseState == PLACE_PROBE) {
+
+
+      remove(probe);
+      probe == null;
+      mouseState = FREE;
+    }
+
+
+    switch(mouseState) {
+    case PLACE_OILRIG:
+      cursor.image.play("rig");
+    case FREE:
+      cursor.image.play("free");
+    case PLACE_PROBE, PLACE_PROBE_PRE:
+      cursor.image.play("probe");
+    }
+
+    var xpos = Std.int(HXP.camera.x);
     for(but in buttons.iterator()) {
-      but.x = HXP.camera.x + HXP.width-225;
-      switch(but._label.text) {
-      case "Send Probe": but.y = HXP.camera.y;
-      case "Build Rig": but.y = HXP.camera.y + 100;
+      but.y = Std.int(HXP.height + HXP.camera.y - 60);
+      but.x = xpos;
+      xpos += 160;
+      if(but.type == "stats") {
+        // wow.
+        but._label.text = "$" + Std.string(coffers) + " \nECO: "
+          + Std.string(curTile != null ? curTile.conservationValue : 0)
+          + "\nRES: " +
+          (curTile != null ? (curTile.resKnown ?
+                             Std.string(curTile.conservationValue) : "???")
+           : "???");
       }
+    }
+
+
+    if(Input.check(Key.ESCAPE)) {
+      HXP.world = new MenuWorld();
     }
 
     cursor.x = mouseX;
@@ -151,7 +218,11 @@ class GameWorld extends World
   public function ConstructRigCallback()
   {
     mouseState = PLACE_OILRIG;
-    cursor.image.play("rig");
+  }
+
+  public function ProbeCallback()
+  {
+    mouseState = PLACE_PROBE_PRE;
   }
 
 }

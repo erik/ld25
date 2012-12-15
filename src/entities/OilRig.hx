@@ -13,7 +13,7 @@ class OilRig extends Facility
   {
     this.type = "oilrig";
 
-    spritemap = new TiledSpritemap("gfx/facilities.png", 64, 64, 64, 64);
+    spritemap = new TiledSpritemap("gfx/facilities.png", 50,50,50,50);
     spritemap.add("active", [0, 1], 2);
 
     spritemap.play("active");

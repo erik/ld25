@@ -24,7 +24,8 @@ class Cursor extends Entity
     type = "cursor";
 
     image = new TiledSpritemap("gfx/cursors.png", 32, 32, 32, 32);
-    image.add("free", [0,1], 3);
+    image.add("free", [0]);
+    image.add("probe", [1]);
     image.add("rig", [2]);
     image.play("free");
 

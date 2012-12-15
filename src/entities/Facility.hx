@@ -8,12 +8,13 @@ import com.haxepunk.graphics.Emitter;
 class Facility extends Entity
 {
   public static inline var PAYOUT_TIMER : Int = 5;
+  public static inline var UPKEEP : Int = 50;
 
   public static var smogLevel : Int;
 
   var emitter : Emitter;
   var payout : Int;
-  var payoutTimer: Float;
+  public var payoutTimer: Float;
   public var online : Bool = true;
 
   public function new(pay : Int, x, y : Float)
@@ -22,7 +23,7 @@ class Facility extends Entity
 
     this.type = "facility";
 
-    setHitbox(64, 64, 0, 0);
+    setHitbox(50, 50, 0, 0);
 
     emitter = new Emitter("gfx/smoke.png", 10, 10);
     emitter.newType('smoke', [0]);
@@ -38,19 +39,10 @@ class Facility extends Entity
   public override function update()
   {
     super.update();
-    emitter.emit('smoke',32, 32);
+    emitter.emit('smoke',width/2, 10);
 
     if(online) {
       payoutTimer -= HXP.elapsed;
     }
-  }
-
-  public function getPayout() : Int
-  {
-    if(payoutTimer <= 0) {
-      payoutTimer = PAYOUT_TIMER;
-      return payout;
-    }
-    return 0;
   }
 }

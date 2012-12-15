@@ -20,7 +20,7 @@ import clash.data.ClashStyle;
 /**
  * A clickable button widget
  */
-class Button extends ClashWidget
+class ToggleButton extends Button
 {
   /**
    * Function to be called on button presses
@@ -43,7 +43,6 @@ class Button extends ClashWidget
 
     var currentStyle : ClashStyle = clash.getElement("Button").getStyle(style);
     _normalRect = makeSliceRectangle(currentStyle.getSlice("Normal"));
-    _hoverRect  = makeSliceRectangle(currentStyle.getSlice("Hover"));
     _downRect   = makeSliceRectangle(currentStyle.getSlice("Down"));
 
     reskin(clash.getCurrentImage());
@@ -76,7 +75,6 @@ class Button extends ClashWidget
   public override function reskin(image : ClashImage) : Void
   {
     _normal = new Image(image.path, _normalRect);
-    _hover = new Image(image.path, _hoverRect);
     _down = new Image(image.path, _downRect);
   }
 
@@ -95,7 +93,6 @@ class Button extends ClashWidget
       if (_clicked) {
         changeState(DOWN);
       } else {
-        changeState(HOVER);
       }
 
       if (_clicked && Input.mouseReleased) {
@@ -103,7 +100,6 @@ class Button extends ClashWidget
       }
     } else {
       if (_clicked) {
-        changeState(HOVER);
       } else {
         changeState(NORMAL);
       }
@@ -119,8 +115,6 @@ class Button extends ClashWidget
     switch (state) {
     case NORMAL:
       graphic = _normal;
-    case HOVER:
-      graphic = _hover;
     case DOWN:
       graphic = _down;
     }
@@ -137,9 +131,6 @@ class Button extends ClashWidget
   public static inline var NORMAL : Int = 0;
   public var _normal : Image;
   public var _normalRect : Rectangle;
-  public static inline var HOVER : Int = 1;
-  public var _hover : Image;
-  public var _hoverRect : Rectangle;
   public static inline var DOWN : Int = 2;
   public var _down : Image;
   public var _downRect : Rectangle;

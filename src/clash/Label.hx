@@ -20,13 +20,12 @@ import clash.data.ClashStyle;
 /**
  * A clickable button widget
  */
-class Button extends ClashWidget
+class Label extends Button
 {
   /**
    * Function to be called on button presses
    * @todo 			Provide more generic callback support
    */
-  public var calling : Void -> Void;
 
   /**
    * Constructor. Must provide a position and a Clash data object
@@ -43,7 +42,6 @@ class Button extends ClashWidget
 
     var currentStyle : ClashStyle = clash.getElement("Button").getStyle(style);
     _normalRect = makeSliceRectangle(currentStyle.getSlice("Normal"));
-    _hoverRect  = makeSliceRectangle(currentStyle.getSlice("Hover"));
     _downRect   = makeSliceRectangle(currentStyle.getSlice("Down"));
 
     reskin(clash.getCurrentImage());
@@ -76,8 +74,7 @@ class Button extends ClashWidget
   public override function reskin(image : ClashImage) : Void
   {
     _normal = new Image(image.path, _normalRect);
-    _hover = new Image(image.path, _hoverRect);
-    _down = new Image(image.path, _downRect);
+    _down = new Image(image.path, _normalRect);
   }
 
   /**
@@ -95,7 +92,6 @@ class Button extends ClashWidget
       if (_clicked) {
         changeState(DOWN);
       } else {
-        changeState(HOVER);
       }
 
       if (_clicked && Input.mouseReleased) {
@@ -103,7 +99,6 @@ class Button extends ClashWidget
       }
     } else {
       if (_clicked) {
-        changeState(HOVER);
       } else {
         changeState(NORMAL);
       }
@@ -114,20 +109,18 @@ class Button extends ClashWidget
     }
   }
 
-  private function changeState(state : Int = 0)
+  private override function changeState(state : Int = 0)
   {
     switch (state) {
     case NORMAL:
       graphic = _normal;
-    case HOVER:
-      graphic = _hover;
     case DOWN:
       graphic = _down;
     }
 
   }
 
-  private function click() : Void
+  private override function click() : Void
   {
     if (calling != null) {
       calling();
@@ -135,14 +128,5 @@ class Button extends ClashWidget
   }
 
   public static inline var NORMAL : Int = 0;
-  public var _normal : Image;
-  public var _normalRect : Rectangle;
-  public static inline var HOVER : Int = 1;
-  public var _hover : Image;
-  public var _hoverRect : Rectangle;
   public static inline var DOWN : Int = 2;
-  public var _down : Image;
-  public var _downRect : Rectangle;
-  public var _label : Text;
-  public var _clicked : Bool;
 }

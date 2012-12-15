@@ -4,7 +4,7 @@
 
  	<app file="Main" main="Main" path="bin" />
 
-	<window width="960" height="620" orientation="portrait" resizable="true" />
+	<window width="960" height="620" orientation="portrait" resizable="false" />
 	<window fps="30" />
 
 	<source path="src" />

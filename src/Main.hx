@@ -19,7 +19,7 @@ class Main extends Engine
 
   override public function init()
   {
-    HXP.console.enable();
+    //HXP.console.enable();
     HXP.screen.color = kClearColor;
     HXP.world = new MenuWorld();
   }

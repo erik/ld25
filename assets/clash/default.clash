@@ -4,10 +4,10 @@
   <image name="Monochromatic" path="gfx/skins/monochromatic.png" />
   <image name="Wooden" path="gfx/skins/wooden.png" />
   <element name="Button">
-    <style name="Default" x="0" y="0" width="225" height="90">
-      <slice name="Normal" x="0" y="0" width="225" height="90" />
-      <slice name="Hover" x="0" y="90" width="225" height="90" />
-      <slice name="Down" x="0" y="180" width="225" height="90" />
+    <style name="Default" x="0" y="0" width="150" height="60">
+      <slice name="Normal" x="0" y="0" width="150" height="60" />
+      <slice name="Hover" x="0" y="60" width="150" height="60" />
+      <slice name="Down" x="0" y="120" width="150" height="60" />
     </style>
   </element>
   <element name="Checkbox">
