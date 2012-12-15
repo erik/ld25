@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="18" height="12" tilewidth="100" tileheight="100">
+ <tileset firstgid="1" name="world_map" tilewidth="100" tileheight="100">
+  <image source="../gfx/world_map.png" width="1800" height="1200"/>
+ </tileset>
+ <tileset firstgid="217" name="tilemap" tilewidth="100" tileheight="100">
+  <image source="../gfx/tilemap.png" width="1024" height="768"/>
+ </tileset>
+ <layer name="collide" width="18" height="12">
+  <data encoding="base64" compression="zlib">
+   eJxjYGBguEkGRgfkmoHNTHLMGqzmUCOcsJlDTbMGkzm0ii9sdtADAACsCoKL
+  </data>
+ </layer>
+</map>

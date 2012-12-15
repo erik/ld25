@@ -4,18 +4,24 @@
 
  	<app file="Main" main="Main" path="bin" />
 
-	<window width="720" height="480" orientation="portrait" resizable="true" />
+	<window width="960" height="620" orientation="portrait" resizable="true" />
 	<window fps="30" />
 
 	<source path="src" />
 
 	<haxelib name="nme" />
 	<haxelib name="HaxePunk" />
+	<haxelib name="HaxePunkTmx" />
 
+        <assets path="assets/levels" rename="levels" type="bytes"
+                include="*.tmx" />
 	<assets path="assets/gfx" rename="gfx" type="image" include="*.png" />
 	<assets path="assets/sfx" rename="sfx" type="sound" include="*.wav" />
-	<assets path="assets/music" rename="music" type="music" include="*.mp3" />
+	<assets path="assets/music" rename="music" type="music"
+                include="*.mp3" />
 	<assets path="assets/font" rename="font" type="font" include="*.ttf" />
+	<assets path="assets/clash" rename="clash" type="clash"
+                include="*.clash" />
 
 	<ndll name="std" />
 	<ndll name="regexp" />

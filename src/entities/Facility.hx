@@ -14,7 +14,7 @@ class Facility extends Entity
   var emitter : Emitter;
   var payout : Int;
   var payoutTimer: Float;
-  var canPay : Bool;
+  public var online : Bool = true;
 
   public function new(pay : Int, x, y : Float)
   {
@@ -33,7 +33,6 @@ class Facility extends Entity
 
     payout = pay;
     payoutTimer = PAYOUT_TIMER;
-    canPay = false;
   }
 
   public override function update()
@@ -41,7 +40,9 @@ class Facility extends Entity
     super.update();
     emitter.emit('smoke',32, 32);
 
-    payoutTimer -= HXP.elapsed;
+    if(online) {
+      payoutTimer -= HXP.elapsed;
+    }
   }
 
   public function getPayout() : Int
@@ -52,5 +53,4 @@ class Facility extends Entity
     }
     return 0;
   }
-
 }

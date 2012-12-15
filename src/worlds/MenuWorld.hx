@@ -10,28 +10,48 @@ import com.haxepunk.graphics.Image;
 import com.haxepunk.graphics.Emitter;
 import com.haxepunk.graphics.Backdrop;
 
+import clash.data.Clash;
+import clash.data.ClashParser;
+import clash.Button;
+import clash.Checkbox;
+import clash.RadioButton;
+import clash.Handle;
+
 class MenuWorld extends World
 {
   var background : Image;
+  private var _currentClash : Clash;
 
   public function new()
   {
     super();
+    _currentClash = ClashParser.parse("clash/default.clash");
   }
 
   public override function begin()
   {
     background = new Image("gfx/menu.png");
     addGraphic(background);
+
+    add(new Button(HXP.width-225, HXP.halfHeight, _currentClash, "Default",
+                   "Click to start", StartButtonCallback));
+
+    add(new Button(HXP.width-225, HXP.halfHeight + 100, _currentClash,
+                   "Default", "Tutorial", TutorialButtonCallback));
   }
 
   public override function update()
   {
-    if(Input.check(Key.SPACE)) {
-      HXP.world = new GameWorld();
-    }
-
     super.update();
   }
 
+  public function StartButtonCallback()
+  {
+    HXP.world = new GameWorld();
+  }
+
+  public function TutorialButtonCallback()
+  {
+    HXP.world = new GameWorld();
+  }
 }

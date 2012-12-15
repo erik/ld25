@@ -5,6 +5,8 @@ import com.haxepunk.graphics.TiledSpritemap;
 
 class OilRig extends Facility
 {
+  public static inline var BUILD_COST : Int = 500;
+
   var spritemap : TiledSpritemap;
 
   public function new(pay : Int, x, y : Float)
