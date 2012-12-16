@@ -3,9 +3,9 @@ package entities;
 import com.haxepunk.Entity;
 import com.haxepunk.graphics.TiledSpritemap;
 
-class Windmill extends Facility
+class RecyclingCenter extends Facility
 {
-  public static inline var BUILD_COST : Int = 250;
+  public static inline var BUILD_COST : Int = 350;
 
   var spritemap : TiledSpritemap;
 
@@ -13,16 +13,16 @@ class Windmill extends Facility
   {
     super(0, x, y);
 
-    this.type = "windmill";
+    positive = true;
+
+    this.type = "recycle";
 
     spritemap = new TiledSpritemap("gfx/facilities.png", 50,50,50,50);
-    spritemap.add("active", [2, 3], 10);
+    spritemap.add("active", [4], 10);
 
     spritemap.play("active");
 
     this.graphic = spritemap;
-
-    positive = true;
   }
 
   public override function particleEffect()
@@ -32,6 +32,6 @@ class Windmill extends Facility
 
   public override function getUpkeep()
   {
-    return 50;
+    return 150;
   }
 }

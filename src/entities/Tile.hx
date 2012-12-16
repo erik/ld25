@@ -16,8 +16,7 @@ class Tile extends Entity
   public var facility : Facility = null;
   public var resourceValue : Int = 30;
   public var conservationValue : Int = 30;
-  public var resKnown : Bool = false;
-  public var explode : Bool = false;
+  public var resKnown : Bool;
 
   public function new(x, y : Int)
   {
@@ -44,6 +43,7 @@ class Tile extends Entity
     }
 
     graphic = outline;
+    resKnown = false;
   }
 
   public function setFac(fac : Facility)
@@ -54,29 +54,36 @@ class Tile extends Entity
 
   public override function update()
   {
-    if(facility != null && facility.online) {
-      resKnown = true;
-      if(facility.payoutTimer <= 0) {
-        facility.payoutTimer = Facility.PAYOUT_TIMER;
-        if(facility.type != "windmill") {
-          cast(HXP.world, GameWorld).coffers += resourceValue + 75;
-          resourceValue = Std.int(resourceValue * .90);
-        }
-        cast(HXP.world, GameWorld).coffers -= facility.getUpkeep();
-      }
-      if(facility.type != "windmill") {
-        cast(HXP.world, GameWorld).activism += conservationValue;
-      } else {
-        cast(HXP.world, GameWorld).activism -= conservationValue +
-          resourceValue;
-      }
-    }
-
     // disturbing my environment!
     if(resKnown) {
       cast(HXP.world, GameWorld).activism += 2;
     }
 
+    if(facility != null) {
+      resKnown = true;
+      if(!facility.positive)
+        cast(HXP.world, GameWorld).activism += conservationValue;
+      if(facility.online) {
+        if(facility.payoutTimer <= 0) {
+          facility.payoutTimer = Facility.PAYOUT_TIMER;
+          if(!facility.positive) {
+            cast(HXP.world, GameWorld).coffers += resourceValue + 75;
+            resourceValue = Std.int(resourceValue * .90);
+          }
+          cast(HXP.world, GameWorld).coffers -= facility.getUpkeep();
+        }
+        if(facility.positive) {
+          switch(facility.type) {
+          case "windmill":
+            cast(HXP.world, GameWorld).activism -= conservationValue +
+              resourceValue;
+          case "recycle":
+            cast(HXP.world, GameWorld).activism -= conservationValue +
+              2 * resourceValue;
+          }
+        }
+      }
+    }
 
     if(resourceValue <= 0) {
       resourceValue = 0;

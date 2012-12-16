@@ -30,6 +30,7 @@ import entities.Facility;
 import entities.ProcessingFacility;
 import entities.OilRig;
 import entities.Windmill;
+import entities.RecyclingCenter;
 import entities.Probe;
 import entities.ResourceGrid;
 import entities.Tile;
@@ -203,12 +204,12 @@ class GameWorld extends World
           mouseState = FREE;
         case PLACE_WINDMILL:
           if(collidePoint("collide", mouseX, mouseY) != null) {
-            if(coffers - Windmill.BUILD_COST > 0) {
+            if(coffers - RecyclingCenter.BUILD_COST > 0) {
               if(curTile != null && curTile.facility == null) {
-                var fac = new Windmill(curTile.x, curTile.y);
+                var fac = new RecyclingCenter(curTile.x, curTile.y);
                 curTile.setFac(fac);
                 add(fac);
-                coffers -= Windmill.BUILD_COST;
+                coffers -= RecyclingCenter.BUILD_COST;
               }
             } else {
               // No money

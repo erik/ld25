@@ -16,6 +16,7 @@ class Facility extends Entity
   var payout : Int;
   public var payoutTimer: Float;
   public var online : Bool = true;
+  public var positive : Bool = false;
 
   public function new(pay : Int, x, y : Float)
   {
