@@ -11,8 +11,6 @@ class OilRig extends Facility
 
   public function new(pay : Int, x, y : Float)
   {
-    this.type = "oilrig";
-
     spritemap = new TiledSpritemap("gfx/facilities.png", 50,50,50,50);
     spritemap.add("active", [0, 1], 2);
     spritemap.add("inactive", [0]);
@@ -24,6 +22,8 @@ class OilRig extends Facility
     this.graphic = spritemap;
 
     super(pay, x, y);
+
+    this.type = "oilrig";
   }
 
   public override function update()

@@ -61,14 +61,23 @@ class Tile extends Entity
 
     if(facility != null) {
       resKnown = true;
-      if(!facility.positive)
-        cast(HXP.world, GameWorld).activism += conservationValue;
+      if(!facility.positive) {
+        if(facility.type=="refinery")
+          cast(HXP.world, GameWorld).activism += 2*conservationValue;
+        else cast(HXP.world, GameWorld).activism += conservationValue;
+      }
       if(facility.online) {
         if(facility.payoutTimer <= 0) {
           facility.payoutTimer = Facility.PAYOUT_TIMER;
           if(!facility.positive) {
-            cast(HXP.world, GameWorld).coffers += resourceValue + 75;
-            resourceValue = Std.int(resourceValue * .90);
+            if(facility.type == "refinery")
+              cast(HXP.world, GameWorld).coffers += resourceValue + 275;
+            else
+              cast(HXP.world, GameWorld).coffers += resourceValue + 75;
+
+            var newR : Int = Std.int(resourceValue * .90);
+            cast(HXP.world, GameWorld).extRes += resourceValue - newR;
+            resourceValue = newR;
           }
           cast(HXP.world, GameWorld).coffers -= facility.getUpkeep();
         }

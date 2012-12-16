@@ -4,6 +4,8 @@ import com.haxepunk.Entity;
 import com.haxepunk.HXP;
 import com.haxepunk.World;
 
+import worlds.GameWorld;
+
 class ResourceGrid extends Entity
 {
   public var tiles : Array<Array<Tile>>;
@@ -24,6 +26,7 @@ class ResourceGrid extends Entity
       for(j in 0...cols) {
         tiles[i][j] = new Tile(i, j);
         HXP.world.add(tiles[i][j]);
+        cast(HXP.world, GameWorld).totRes += tiles[i][j].resourceValue;
       }
     }
   }

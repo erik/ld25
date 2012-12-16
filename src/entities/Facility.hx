@@ -51,12 +51,12 @@ class Facility extends Entity
 
   public override function update()
   {
-    super.update();
     if(online)particleEffect();
 
     if(online) {
       payoutTimer -= HXP.elapsed;
     }
+    super.update();
   }
 
   public function getUpkeep() : Int

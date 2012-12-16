@@ -31,11 +31,13 @@ import entities.ProcessingFacility;
 import entities.OilRig;
 import entities.Windmill;
 import entities.RecyclingCenter;
+import entities.Refinery;
 import entities.Probe;
 import entities.ResourceGrid;
 import entities.Tile;
 
 import entities.Cursor;
+import entities.ImageButton;
 
 enum MouseState {
   FREE;
@@ -66,6 +68,10 @@ class GameWorld extends World
   var overImg : Image;
   public var activism : Int = 0;
   public var cond : LoseCondition;
+  public var but : ImageButton;
+  public var totRes : Int;
+  public var extRes : Int = 0;
+
 
   public function new()
   {
@@ -149,6 +155,11 @@ class GameWorld extends World
     overImg.y = HXP.halfHeight;
     addGraphic(overImg).layer = 0;
 
+    add(new ImageButton(HXP.width - 64-5, HXP.height -64-5, 0));
+    add(new ImageButton(HXP.width - 64-5, HXP.height -128-5, 1));
+    add(new ImageButton(HXP.width - 64-5, HXP.height -192-5, 2));
+    add(new ImageButton(HXP.width - 64-5, HXP.height -256-5, 3));
+    add(new ImageButton(HXP.width - 64-5, HXP.height -320-5, 4));
 
     camera.x = HXP.halfWidth;
     camera.y = HXP.halfHeight;
@@ -204,12 +215,12 @@ class GameWorld extends World
           mouseState = FREE;
         case PLACE_WINDMILL:
           if(collidePoint("collide", mouseX, mouseY) != null) {
-            if(coffers - RecyclingCenter.BUILD_COST > 0) {
+            if(coffers - Windmill.BUILD_COST > 0) {
               if(curTile != null && curTile.facility == null) {
-                var fac = new RecyclingCenter(curTile.x, curTile.y);
+                var fac = new Windmill(curTile.x, curTile.y);
                 curTile.setFac(fac);
                 add(fac);
-                coffers -= RecyclingCenter.BUILD_COST;
+                coffers -= Windmill.BUILD_COST;
               }
             } else {
               // No money
@@ -294,8 +305,9 @@ class GameWorld extends World
            : "???");
       } else if(but.type == "stats2") {
         var per = Std.int(activism / 1000 * 100);
-        but._label.text = "$" + Std.string(coffers) + "\nACT:" +
-          Std.string(per < 0? 0 : per) + "%";
+        but._label.text = "$" + Std.string(coffers) + "\nACT: " +
+          Std.string(per < 0? 0 : per) + "%" + "\nEXT: " +
+          Std.string(Std.int(extRes/totRes * 100)) + "%";
       }
     }
 
