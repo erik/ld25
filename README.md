@@ -1,3 +1,14 @@
+This is my Ludum Dare #25 entry. The theme was "You are the villain"
+
+
+This is seriously the worst code I've ever written, I advise not using
+it **ever**, but everything (code/"art"/sound) is licensed under
+WTFPL.
+
+Below is the original idea I drafted Friday night. I scaled it down
+and changed some things to finish everything.
+
+
 Clean Energy Tycoon
 ======================
 
