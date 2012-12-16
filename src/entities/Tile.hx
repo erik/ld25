@@ -30,6 +30,7 @@ class Tile extends Entity
     outline.add("reg", [0]);
     outline.add("sel", [1]);
     outline.add("known", [2]);
+    outline.add("spent", [3]);
 
     outline.play("reg");
 
@@ -39,19 +40,49 @@ class Tile extends Entity
     resourceValue = Std.random(2*conservationValue);
 
     if(Std.random(10) == 0) {
-      explode = true;
+      resourceValue = 0;
     }
 
     graphic = outline;
   }
 
+  public function setFac(fac : Facility)
+  {
+    HXP.world.add(fac);
+    facility = fac;
+  }
+
   public override function update()
   {
-    if(facility != null) {
+    if(facility != null && facility.online) {
       resKnown = true;
       if(facility.payoutTimer <= 0) {
         facility.payoutTimer = Facility.PAYOUT_TIMER;
-        cast(HXP.world, GameWorld).coffers += resourceValue - Facility.UPKEEP;
+        if(facility.type != "windmill") {
+          cast(HXP.world, GameWorld).coffers += resourceValue + 75;
+          resourceValue = Std.int(resourceValue * .90);
+        }
+        cast(HXP.world, GameWorld).coffers -= facility.getUpkeep();
+      }
+      if(facility.type != "windmill") {
+        cast(HXP.world, GameWorld).activism += conservationValue;
+      } else {
+        cast(HXP.world, GameWorld).activism -= conservationValue +
+          resourceValue;
+      }
+    }
+
+    // disturbing my environment!
+    if(resKnown) {
+      cast(HXP.world, GameWorld).activism += 2;
+    }
+
+
+    if(resourceValue <= 0) {
+      resourceValue = 0;
+      if(facility != null && facility.online && facility.type != "windmill") {
+        Explosion.at(facility.x+25, facility.y+25);
+        facility.online = false;
       }
     }
 
@@ -59,7 +90,10 @@ class Tile extends Entity
       outline.play("sel");
       selected = false;
     } else {
-      if(resKnown) outline.play("known");
+      if(resKnown) {
+        if(resourceValue == 0) outline.play("spent");
+        else outline.play("known");
+      }
       else outline.play("reg");
     }
     super.update();

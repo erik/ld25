@@ -7,8 +7,8 @@ import com.haxepunk.graphics.Emitter;
 
 class Facility extends Entity
 {
-  public static inline var PAYOUT_TIMER : Int = 5;
-  public static inline var UPKEEP : Int = 100;
+  public static inline var PAYOUT_TIMER : Float = 1;
+  public static inline var UPKEEP : Int = 50;
 
   public static var smogLevel : Int;
 
@@ -29,6 +29,8 @@ class Facility extends Entity
     emitter.newType('smoke', [0]);
     emitter.setMotion('smoke', 45, 45, .2, 70, 20, 3);
     emitter.setAlpha('smoke', 1, 0);
+    emitter.setColor('smoke', 0x00000);
+    emitter.setGravity('smoke', 2);
 
     addGraphic(emitter);
 
@@ -36,13 +38,28 @@ class Facility extends Entity
     payoutTimer = PAYOUT_TIMER;
   }
 
+  public function particleEffect() : Void
+  {
+    emitter.emit('smoke',width/2, 10);
+  }
+
+  public function die()
+  {
+    HXP.world.remove(this);
+  }
+
   public override function update()
   {
     super.update();
-    emitter.emit('smoke',width/2, 10);
+    if(online)particleEffect();
 
     if(online) {
       payoutTimer -= HXP.elapsed;
     }
+  }
+
+  public function getUpkeep() : Int
+  {
+    return UPKEEP;
   }
 }

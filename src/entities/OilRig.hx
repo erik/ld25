@@ -15,11 +15,23 @@ class OilRig extends Facility
 
     spritemap = new TiledSpritemap("gfx/facilities.png", 50,50,50,50);
     spritemap.add("active", [0, 1], 2);
+    spritemap.add("inactive", [0]);
 
     spritemap.play("active");
+
+    online = true;
 
     this.graphic = spritemap;
 
     super(pay, x, y);
   }
+
+  public override function update()
+  {
+    if(!online) {
+      spritemap.play("inactive");
+    }
+    super.update();
+  }
+
 }

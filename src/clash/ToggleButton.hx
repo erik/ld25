@@ -26,7 +26,6 @@ class ToggleButton extends Button
    * Function to be called on button presses
    * @todo 			Provide more generic callback support
    */
-  public var calling : Void -> Void;
 
   /**
    * Constructor. Must provide a position and a Clash data object
@@ -101,7 +100,7 @@ class ToggleButton extends Button
     } else {
       if (_clicked) {
       } else {
-        changeState(NORMAL);
+        //changeState(NORMAL);
       }
     }
 
@@ -110,7 +109,7 @@ class ToggleButton extends Button
     }
   }
 
-  private function changeState(state : Int = 0)
+  private override function changeState(state : Int = 0)
   {
     switch (state) {
     case NORMAL:
@@ -121,7 +120,7 @@ class ToggleButton extends Button
 
   }
 
-  private function click() : Void
+  private override function click() : Void
   {
     if (calling != null) {
       calling();
@@ -129,11 +128,6 @@ class ToggleButton extends Button
   }
 
   public static inline var NORMAL : Int = 0;
-  public var _normal : Image;
-  public var _normalRect : Rectangle;
   public static inline var DOWN : Int = 2;
-  public var _down : Image;
-  public var _downRect : Rectangle;
-  public var _label : Text;
-  public var _clicked : Bool;
+
 }
