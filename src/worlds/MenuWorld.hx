@@ -61,6 +61,6 @@ class MenuWorld extends World
 
   public function TutorialButtonCallback()
   {
-    HXP.world = new GameWorld();
+    HXP.world = new TutorialWorld();
   }
 }

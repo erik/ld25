@@ -352,7 +352,7 @@ class GameWorld extends World
     var per = Std.int(activism / 1000 * 100);
     // wow.
     text.setText(
-      "$" + Std.string(coffers) + ",\tACT: " +
+      "$" + Std.string(coffers) + ", ACT: " +
       Std.string(per < 0? 0 : per) + "%, EXT: " +
       Std.string(Std.int(extRes/totRes * 100)) + "%"
       +"\n\n" +(curTile != null ? curTile.facility != null
