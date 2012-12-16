@@ -5,6 +5,7 @@ import nme.geom.Point;
 
 import com.haxepunk.Engine;
 import com.haxepunk.HXP;
+import com.haxepunk.Sfx;
 import com.haxepunk.masks.Grid;
 import com.haxepunk.World;
 import com.haxepunk.utils.Input;
@@ -38,10 +39,13 @@ import entities.Tile;
 
 import entities.Cursor;
 import entities.ImageButton;
+import entities.TextArea;
 
 enum MouseState {
   FREE;
   PLACE_OILRIG;
+  PLACE_REFINERY;
+  PLACE_RECYCLING;
   PLACE_WINDMILL;
   PLACE_PROBE_PRE;
   PLACE_PROBE;
@@ -71,17 +75,21 @@ class GameWorld extends World
   public var but : ImageButton;
   public var totRes : Int;
   public var extRes : Int = 0;
-
+  public var dontAdd : Bool = false;
+  public var text : TextArea;
+  public var place : Sfx;
 
   public function new()
   {
     super();
-    _currentClash = ClashParser.parse("clash/default.clash");
+    _currentClash = ClashParser.parse("clash/default2.clash");
   }
 
   public override function begin()
   {
     flash.ui.Mouse.hide();
+
+    place = new Sfx("sfx/place.wav");
 
     background = new Image("gfx/world_map.png");
 
@@ -89,36 +97,9 @@ class GameWorld extends World
 
     buttons = new Array<Button>();
 
-    var l = new Label(0, 0, _currentClash, "Default",
-                      "000000000000\n000000000000\n000000000000");
-    l.type = "stats1";
-    buttons.push(l);
-    add(l);
-
-    l = new Label(0, 0, _currentClash, "Default",
-                  "000000000000\n000000000000\n000000000000");
-    l.type = "stats2";
-    buttons.push(l);
-    add(l);
-
-    var b = new Button(160, 0, _currentClash,
-                       "Default", "Probe Region\n$50/tile",
-                       ProbeCallback);
-    buttons.push(b);
-    add(b);
-
-    b = new Button(310, 0, _currentClash,
-                   "Default", "Build Rig\n$500 ($50 run)",
-                   ConstructRigCallback);
-    buttons.push(b);
-    add(b);
-
-    b = new Button(310, 0, _currentClash,
-                   "Default", "Build Windmill\n$250 ($50 run)",
-                   ConstructWindmillCallback);
-    buttons.push(b);
-    add(b);
-
+    text = new TextArea(1, HXP.height - 64,
+                        "textarea", new Image("gfx/textarea.png"));
+    add(text);
 
     mouseState = FREE;
 
@@ -155,11 +136,40 @@ class GameWorld extends World
     overImg.y = HXP.halfHeight;
     addGraphic(overImg).layer = 0;
 
-    add(new ImageButton(HXP.width - 64-5, HXP.height -64-5, 0));
-    add(new ImageButton(HXP.width - 64-5, HXP.height -128-5, 1));
-    add(new ImageButton(HXP.width - 64-5, HXP.height -192-5, 2));
-    add(new ImageButton(HXP.width - 64-5, HXP.height -256-5, 3));
-    add(new ImageButton(HXP.width - 64-5, HXP.height -320-5, 4));
+
+    var xpos : Int = HXP.width-64;
+
+    add(new ImageButton(xpos -= 1, HXP.height -64, 4, ConstructRefineryCallback,
+                        " The latest and greatest in\n" +
+                        " resource draining technology!\n\n" +
+                        " Refineries are more efficient\n" +
+                        " than oil rigs, but more expensive\n\n" +
+                        " Costs $750 to build, $150 to run"
+          ));
+    add(new ImageButton(xpos -= 64+1, HXP.height - 64, 3, ConstructRecycleCallback,
+                        " The perfect activism reducer\n" +
+                        " Recycling facilities make the\n" +
+                        " activists jump for joy. \n\n" +
+                        " Significantly reduces activism\n\n" +
+                        " Costs $1000 to build, $250 to run"
+                        ));
+    add(new ImageButton(xpos -= 64+1, HXP.height -64, 2, ConstructWindmillCallback,
+                        " They sure love their windmills for\n" +
+                        " some reason\n\n" +
+                        " Decreases activism at rate of\n" +
+                        " RES + ECO for a given tile\n\n" +
+                        " Costs $250 to build, $50 to run"));
+    add(new ImageButton(xpos -= 64+1, HXP.height -64, 1, ConstructRigCallback,
+                        " Construct basic oil rig facility.\n\n" +
+                        " Quick and easy resource draining!\n\n" +
+                        " Costs $500 to build, running cost\n" +
+                        " is $50"));
+    add(new ImageButton(xpos -= 64+1, HXP.height -64, 0, ProbeCallback,
+                        " Probe a region for delicious oil\n\n" +
+                        " Reveals the resources available\n" +
+                        " on each selected tile.\n\n" +
+                        " Probing costs $50 per tile\n"+
+                        " and slightly increases activism"));
 
     camera.x = HXP.halfWidth;
     camera.y = HXP.halfHeight;
@@ -168,6 +178,8 @@ class GameWorld extends World
 
   public override function update()
   {
+    dontAdd = false;
+
     if(Input.check("left")) {
       camera.x -= HXP.elapsed * 350;
       HXP.clamp(camera.x, 0, background.width);
@@ -186,96 +198,140 @@ class GameWorld extends World
       HXP.clamp(camera.y, 0, background.height);
     }
 
+
+    super.update();
+
     if(coffers < 0) {
       lose = true;
       cond = BANKRUPT;
     }
-
     var curTile : Tile = cast(collidePoint("tile", mouseX, mouseY),Tile);
-    if(curTile != null) {
-      curTile.selected = true;
-    }
-    if(!lose) {
-      if(Input.mousePressed) {
-        switch(mouseState) {
-        case PLACE_OILRIG:
-          if(collidePoint("collide", mouseX, mouseY) != null) {
-            if(coffers - OilRig.BUILD_COST > 0) {
-              if(curTile != null && curTile.facility == null) {
-                var fac = new OilRig(Std.random(100), curTile.x, curTile.y);
-                curTile.setFac(fac);
-                coffers -= OilRig.BUILD_COST;
+
+    if(!dontAdd) {
+      if(curTile != null) {
+        curTile.selected = true;
+      }
+      if(!lose) {
+        if(Input.mousePressed) {
+          switch(mouseState) {
+          case PLACE_REFINERY:
+            if(collidePoint("collide", mouseX, mouseY) != null) {
+              if(coffers - Refinery.BUILD_COST > 0) {
+                if(curTile != null && curTile.facility == null) {
+                  var fac = new Refinery(curTile.x, curTile.y);
+                  curTile.setFac(fac);
+                  coffers -= Refinery.BUILD_COST;
+                  place.play(0.5);
+                }
+              } else {
+                // No money
               }
             } else {
-              // No money
+              Explosion.waterAt(mouseX, mouseY);
             }
-          } else {
-            Explosion.waterAt(mouseX, mouseY);
-          }
-          mouseState = FREE;
-        case PLACE_WINDMILL:
-          if(collidePoint("collide", mouseX, mouseY) != null) {
-            if(coffers - Windmill.BUILD_COST > 0) {
-              if(curTile != null && curTile.facility == null) {
-                var fac = new Windmill(curTile.x, curTile.y);
-                curTile.setFac(fac);
-                add(fac);
-                coffers -= Windmill.BUILD_COST;
+            mouseState = FREE;
+          case PLACE_RECYCLING:
+            if(collidePoint("collide", mouseX, mouseY) != null) {
+              if(coffers - RecyclingCenter.BUILD_COST > 0) {
+                if(curTile != null && curTile.facility == null) {
+                  var fac = new RecyclingCenter(curTile.x, curTile.y);
+                  curTile.setFac(fac);
+                  coffers -= RecyclingCenter.BUILD_COST;
+                  place.play(0.5);
+                }
+              } else {
+                // No money
               }
             } else {
-              // No money
+              Explosion.waterAt(mouseX, mouseY);
             }
-          } else {
-            Explosion.waterAt(mouseX, mouseY);
+            mouseState = FREE;
+          case PLACE_OILRIG:
+            if(collidePoint("collide", mouseX, mouseY) != null) {
+              if(coffers - OilRig.BUILD_COST > 0) {
+                if(curTile != null && curTile.facility == null) {
+                  var fac = new OilRig(Std.random(100), curTile.x, curTile.y);
+                  curTile.setFac(fac);
+                  coffers -= OilRig.BUILD_COST;
+                  place.play(0.5);
+                }
+              } else {
+                // No money
+              }
+            } else {
+              Explosion.waterAt(mouseX, mouseY);
+            }
+            mouseState = FREE;
+          case PLACE_WINDMILL:
+            if(collidePoint("collide", mouseX, mouseY) != null) {
+              if(coffers - Windmill.BUILD_COST > 0) {
+                if(curTile != null && curTile.facility == null) {
+                  var fac = new Windmill(curTile.x, curTile.y);
+                  curTile.setFac(fac);
+                  add(fac);
+                  coffers -= Windmill.BUILD_COST;
+                  place.play(0.5);
+                }
+              } else {
+                // No money
+              }
+            } else {
+              Explosion.waterAt(mouseX, mouseY);
+            }
+            mouseState = FREE;
+          case PLACE_PROBE_PRE:
+            mouseState = PLACE_PROBE;
+            probe = new Probe(Std.int(mouseX / Tile.TILE_SIZE) * Tile.TILE_SIZE,
+                              Std.int(mouseY / Tile.TILE_SIZE) * Tile.TILE_SIZE);
+            add(probe);
+          case FREE:
+            //
+          case PLACE_PROBE:
+            //
           }
+        }
+
+        if(Input.mouseDown && mouseState == PLACE_PROBE) {
+          probe.setEnd(mouseX, mouseY);
+        }
+
+        if(Input.mouseReleased && mouseState == PLACE_PROBE) {
+          var start = new Point(probe.x / Tile.TILE_SIZE,
+                                probe.y / Tile.TILE_SIZE);
+          var end = new Point(Std.int(probe.endPos.x / Tile.TILE_SIZE),
+                              Std.int(probe.endPos.y / Tile.TILE_SIZE));
+
+          var cost = (Std.int(end.x+1)-Std.int(start.x)) *
+            (Std.int(end.y+1)-Std.int(start.y)) * 50;
+
+          if(coffers - cost >= 0) {
+            var tiles = grid.tiles;
+
+            for(i in Std.int(start.x)...Std.int(end.x+1)) {
+              if(i >= tiles.length || i < 0) { break; }
+              for(j in Std.int(start.y)...Std.int(end.y+1)) {
+                if(j >= tiles[i].length || j < 0 ) { break; }
+                tiles[i][j].selected = true;
+                tiles[i][j].resKnown = true;
+              }
+            }
+            coffers -= cost;
+          }
+
+          remove(probe);
+          probe == null;
           mouseState = FREE;
-        case PLACE_PROBE_PRE:
-          mouseState = PLACE_PROBE;
-          probe = new Probe(Std.int(mouseX / Tile.TILE_SIZE) * Tile.TILE_SIZE,
-                            Std.int(mouseY / Tile.TILE_SIZE) * Tile.TILE_SIZE);
-          add(probe);
-        case FREE:
-          //
-        case PLACE_PROBE:
-          //
         }
-      }
-
-      if(Input.mouseDown && mouseState == PLACE_PROBE) {
-        probe.setEnd(mouseX, mouseY);
-      }
-
-      if(Input.mouseReleased && mouseState == PLACE_PROBE) {
-        var start = new Point(probe.x / Tile.TILE_SIZE,
-                              probe.y / Tile.TILE_SIZE);
-        var end = new Point(Std.int(probe.endPos.x / Tile.TILE_SIZE),
-                            Std.int(probe.endPos.y / Tile.TILE_SIZE));
-
-        var cost = (Std.int(end.x+1)-Std.int(start.x)) *
-          (Std.int(end.y+1)-Std.int(start.y)) * 50;
-
-        if(coffers - cost >= 0) {
-          var tiles = grid.tiles;
-
-          for(i in Std.int(start.x)...Std.int(end.x+1)) {
-            if(i >= tiles.length || i < 0) { break; }
-            for(j in Std.int(start.y)...Std.int(end.y+1)) {
-              if(j >= tiles[i].length || j < 0 ) { break; }
-              tiles[i][j].selected = true;
-              tiles[i][j].resKnown = true;
-            }
-          }
-          coffers -= cost;
-        }
-
-        remove(probe);
-        probe == null;
-        mouseState = FREE;
       }
     }
+
     switch(mouseState) {
     case PLACE_OILRIG:
       cursor.image.play("rig");
+    case PLACE_REFINERY:
+      cursor.image.play("ref");
+    case PLACE_RECYCLING:
+      cursor.image.play("rec");
     case PLACE_WINDMILL:
       cursor.image.play("windmill");
     case FREE:
@@ -291,25 +347,24 @@ class GameWorld extends World
       but.y = Std.int(HXP.height + HXP.camera.y - 60);
       but.x = xpos;
       xpos += 160;
-      if(but.type == "stats1") {
-        but.y -= 60;
-        xpos -= 160;
-        // wow.
-        but._label.text = (curTile != null ? curTile.facility != null
-                           ? curTile.facility.type : "empty" : "empty")
-          + " \nECO: "
-          + Std.string(curTile != null ? curTile.conservationValue : 0)
-          + "\nRES: " +
-          (curTile != null ? (curTile.resKnown ?
-                              Std.string(curTile.resourceValue) : "???")
-           : "???");
-      } else if(but.type == "stats2") {
-        var per = Std.int(activism / 1000 * 100);
-        but._label.text = "$" + Std.string(coffers) + "\nACT: " +
-          Std.string(per < 0? 0 : per) + "%" + "\nEXT: " +
-          Std.string(Std.int(extRes/totRes * 100)) + "%";
-      }
-    }
+     }
+
+    var per = Std.int(activism / 1000 * 100);
+    // wow.
+    text.setText(
+      "$" + Std.string(coffers) + ",\tACT: " +
+      Std.string(per < 0? 0 : per) + "%, EXT: " +
+      Std.string(Std.int(extRes/totRes * 100)) + "%"
+      +"\n\n" +(curTile != null ? curTile.facility != null
+       ? curTile.facility.type : "Empty" : "Empty")
+      + ", ECO: "
+      + Std.string(curTile != null ? curTile.conservationValue : 0)
+      + ", RES: " +
+      (curTile != null ? (curTile.resKnown ?
+                          Std.string(curTile.resourceValue) : "???")
+       : "???"));
+
+
 
     if(activism > 1000) {
       lose = true;
@@ -342,22 +397,36 @@ class GameWorld extends World
 
     activism = 0;
 
-    super.update();
   }
 
   public function ConstructRigCallback()
   {
-    mouseState = PLACE_OILRIG;
+    if(mouseState == PLACE_OILRIG) mouseState = FREE;
+    else mouseState = PLACE_OILRIG;
+  }
+
+  public function ConstructRecycleCallback()
+  {
+    if(mouseState == PLACE_RECYCLING) mouseState = FREE;
+    else mouseState = PLACE_RECYCLING;
+  }
+
+  public function ConstructRefineryCallback()
+  {
+    if(mouseState == PLACE_REFINERY) mouseState = FREE;
+    else mouseState = PLACE_REFINERY;
   }
 
   public function ConstructWindmillCallback()
   {
-    mouseState = PLACE_WINDMILL;
+    if(mouseState == PLACE_WINDMILL) mouseState = FREE;
+    else mouseState = PLACE_WINDMILL;
   }
 
   public function ProbeCallback()
   {
-    mouseState = PLACE_PROBE_PRE;
+    if(mouseState == PLACE_PROBE_PRE) mouseState = FREE;
+    else mouseState = PLACE_PROBE_PRE;
   }
 
 }

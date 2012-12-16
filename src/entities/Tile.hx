@@ -55,7 +55,7 @@ class Tile extends Entity
   public override function update()
   {
     // disturbing my environment!
-    if(resKnown) {
+    if(resKnown && facility == null) {
       cast(HXP.world, GameWorld).activism += 2;
     }
 
@@ -96,9 +96,9 @@ class Tile extends Entity
 
     if(resourceValue <= 0) {
       resourceValue = 0;
-      if(facility != null && facility.online && facility.type != "windmill") {
+      if(facility != null && (facility.online && !facility.positive) && facility.type != "windmill") {
         Explosion.at(facility.x+25, facility.y+25);
-        facility.online = false;
+        facility.online = facility.positive || false;
       }
     }
 

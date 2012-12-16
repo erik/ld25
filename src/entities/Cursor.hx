@@ -28,6 +28,8 @@ class Cursor extends Entity
     image.add("probe", [1]);
     image.add("rig", [2]);
     image.add("windmill", [3]);
+    image.add("rec", [4]);
+    image.add("ref", [5]);
     image.play("free");
 
     layer = 0;

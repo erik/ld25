@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<clash version="0.2" name="Default Template" width="640" height="480" path="clash">
+  <image name="Default" path="gfx/skins/default2.png" />
+  <image name="Monochromatic" path="gfx/skins/monochromatic.png" />
+  <image name="Wooden" path="gfx/skins/wooden.png" />
+  <element name="Button">
+    <style name="Default" x="0" y="0" width="300" height="480">
+      <slice name="Normal" x="0" y="0" width="300" height="480" />
+    </style>
+  </element>
+</clash>
