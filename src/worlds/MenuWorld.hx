@@ -43,10 +43,10 @@ class MenuWorld extends World
         addGraphic(background);
 
     add(new Button(HXP.width-225, HXP.halfHeight, _currentClash, "Default",
-                   "Click to start", StartButtonCallback));
+                   "  Begin  ", StartButtonCallback));
 
     add(new Button(HXP.width-225, HXP.halfHeight + 100, _currentClash,
-                   "Default", "Tutorial", TutorialButtonCallback));
+                   "Default", "  Tutorial  ", TutorialButtonCallback));
   }
 
   public override function update()

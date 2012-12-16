@@ -52,6 +52,7 @@ enum MouseState {
 }
 
 enum LoseCondition {
+  WIN;
   BANKRUPT;
   OVERTHROW;
 }
@@ -69,6 +70,7 @@ class GameWorld extends World
   var probe : Probe;
   var lose : Bool = false;
   var bankruptImg : Image;
+  var winImg : Image;
   var overImg : Image;
   public var activism : Int = 0;
   public var cond : LoseCondition;
@@ -120,7 +122,7 @@ class GameWorld extends World
     Input.define("up",    [Key.UP, Key.W]);
     Input.define("down",  [Key.DOWN, Key.S]);
 
-    coffers = 5000;
+    coffers = 1500;
 
     grid = new ResourceGrid(background.width, background.height);
 
@@ -130,6 +132,14 @@ class GameWorld extends World
     bankruptImg.y = HXP.halfHeight;
     addGraphic(bankruptImg).layer = 0;
 
+
+    winImg = new Image("gfx/gameover_win.png");
+    winImg.visible = false;
+    winImg.x = HXP.halfWidth;
+    winImg.y = HXP.halfHeight;
+    addGraphic(winImg).layer = 0;
+
+
     overImg = new Image("gfx/gameover_overthrow.png");
     overImg.visible = false;
     overImg.x = HXP.halfWidth;
@@ -137,39 +147,43 @@ class GameWorld extends World
     addGraphic(overImg).layer = 0;
 
 
-    var xpos : Int = HXP.width-64;
+    var xpos : Int = Std.int((HXP.width-65*5)/2);
 
-    add(new ImageButton(xpos -= 1, HXP.height -64, 4, ConstructRefineryCallback,
-                        " The latest and greatest in\n" +
-                        " resource draining technology!\n\n" +
-                        " Refineries are more efficient\n" +
-                        " than oil rigs, but more expensive\n\n" +
-                        " Costs $750 to build, $150 to run"
-          ));
-    add(new ImageButton(xpos -= 64+1, HXP.height - 64, 3, ConstructRecycleCallback,
-                        " The perfect activism reducer\n" +
-                        " Recycling facilities make the\n" +
-                        " activists jump for joy. \n\n" +
-                        " Significantly reduces activism\n\n" +
-                        " Costs $1000 to build, $250 to run"
-                        ));
-    add(new ImageButton(xpos -= 64+1, HXP.height -64, 2, ConstructWindmillCallback,
-                        " They sure love their windmills for\n" +
-                        " some reason\n\n" +
-                        " Decreases activism at rate of\n" +
-                        " RES + ECO for a given tile\n\n" +
-                        " Costs $250 to build, $50 to run"));
-    add(new ImageButton(xpos -= 64+1, HXP.height -64, 1, ConstructRigCallback,
-                        " Construct basic oil rig facility.\n\n" +
-                        " Quick and easy resource draining!\n\n" +
-                        " Costs $500 to build, running cost\n" +
-                        " is $50"));
-    add(new ImageButton(xpos -= 64+1, HXP.height -64, 0, ProbeCallback,
+
+    add(new ImageButton(xpos += 1, HXP.height -64, 0, ProbeCallback,
                         " Probe a region for delicious oil\n\n" +
                         " Reveals the resources available\n" +
                         " on each selected tile.\n\n" +
                         " Probing costs $50 per tile\n"+
                         " and slightly increases activism"));
+
+    add(new ImageButton(xpos += 64+1, HXP.height -64, 1, ConstructRigCallback,
+                        " Construct basic oil rig facility.\n\n" +
+                        " Quick and easy resource draining!\n\n" +
+                        " Costs $500 to build"));
+    add(new ImageButton(xpos += 64+1, HXP.height -64, 4, ConstructRefineryCallback,
+                        " The latest and greatest in\n" +
+                        " resource draining technology!\n\n" +
+                        " Refineries are much more\n" +
+                        " efficient than oil rigs, but more\n" +
+                        " expensive\n\n" +
+                        " Costs $2500 to build."
+          ));
+
+    add(new ImageButton(xpos += 64+1, HXP.height -64, 2, ConstructWindmillCallback,
+                        " They sure love their windmills for\n" +
+                        " some reason\n\n" +
+                        " Decreases activism at rate of\n" +
+                        " RES + ECO for a given tile\n\n" +
+                        " Costs $150 to build, $5 to run"));
+
+    add(new ImageButton(xpos += 64+1, HXP.height - 64, 3, ConstructRecycleCallback,
+                        " The perfect activism reducer\n" +
+                        " Recycling facilities make the\n" +
+                        " activists jump for joy. \n\n" +
+                        " Significantly reduces activism\n\n" +
+                        " Costs $350 to build, $50 to run"
+                        ));
 
     camera.x = HXP.halfWidth;
     camera.y = HXP.halfHeight;
@@ -205,6 +219,12 @@ class GameWorld extends World
       lose = true;
       cond = BANKRUPT;
     }
+
+    if(extRes >= totRes) {
+      lose = true;
+      cond = WIN;
+    }
+
     var curTile : Tile = cast(collidePoint("tile", mouseX, mouseY),Tile);
 
     if(!dontAdd) {
@@ -349,7 +369,7 @@ class GameWorld extends World
       xpos += 160;
      }
 
-    var per = Std.int(activism / 1000 * 100);
+    var per = Std.int(activism / 2500 * 100);
     // wow.
     text.setText(
       "$" + Std.string(coffers) + ", ACT: " +
@@ -366,7 +386,7 @@ class GameWorld extends World
 
 
 
-    if(activism > 1000) {
+    if(activism > 2500) {
       lose = true;
       cond = OVERTHROW;
     }
@@ -389,6 +409,13 @@ class GameWorld extends World
                                 HXP.camera.x);
         bankruptImg.y = Std.int(HXP.halfHeight- bankruptImg.height/2 +
                                 HXP.camera.y);
+      case WIN:
+        winImg.visible = true;
+        winImg.x = Std.int(HXP.halfWidth - winImg.width/2 +
+                                HXP.camera.x);
+        winImg.y = Std.int(HXP.halfHeight- winImg.height/2 +
+                                HXP.camera.y);
+
       }
     }
 

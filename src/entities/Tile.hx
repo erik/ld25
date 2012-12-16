@@ -2,6 +2,7 @@ package entities;
 
 import com.haxepunk.Entity;
 import com.haxepunk.HXP;
+import com.haxepunk.Sfx;
 import com.haxepunk.World;
 import com.haxepunk.graphics.TiledSpritemap;
 
@@ -17,6 +18,7 @@ class Tile extends Entity
   public var resourceValue : Int = 30;
   public var conservationValue : Int = 30;
   public var resKnown : Bool;
+  public var boom : Sfx;
 
   public function new(x, y : Int)
   {
@@ -32,6 +34,8 @@ class Tile extends Entity
     outline.add("spent", [3]);
 
     outline.play("reg");
+
+    boom = new Sfx("sfx/boom.wav");
 
     layer = 10;
 
@@ -63,31 +67,34 @@ class Tile extends Entity
       resKnown = true;
       if(!facility.positive) {
         if(facility.type=="refinery")
-          cast(HXP.world, GameWorld).activism += 2*conservationValue;
+          cast(HXP.world, GameWorld).activism += 3*conservationValue;
         else cast(HXP.world, GameWorld).activism += conservationValue;
       }
       if(facility.online) {
         if(facility.payoutTimer <= 0) {
           facility.payoutTimer = Facility.PAYOUT_TIMER;
           if(!facility.positive) {
-            if(facility.type == "refinery")
-              cast(HXP.world, GameWorld).coffers += resourceValue + 275;
-            else
-              cast(HXP.world, GameWorld).coffers += resourceValue + 75;
+            var newR : Int;
+            if(facility.type == "refinery") {
+              cast(HXP.world, GameWorld).coffers += 2 * resourceValue;
+              newR = resourceValue - 5;
+            } else {
+              cast(HXP.world, GameWorld).coffers += resourceValue ;
+              newR = resourceValue - 5;
+            }
 
-            var newR : Int = Std.int(resourceValue * .90);
             cast(HXP.world, GameWorld).extRes += resourceValue - newR;
             resourceValue = newR;
           }
-          cast(HXP.world, GameWorld).coffers -= facility.getUpkeep();
+          if(facility.positive) cast(HXP.world, GameWorld).coffers -= facility.getUpkeep();
         }
         if(facility.positive) {
           switch(facility.type) {
           case "windmill":
-            cast(HXP.world, GameWorld).activism -= conservationValue +
+            cast(HXP.world, GameWorld).activism -= 2 * conservationValue +
               resourceValue;
           case "recycle":
-            cast(HXP.world, GameWorld).activism -= conservationValue +
+            cast(HXP.world, GameWorld).activism -= 3 * conservationValue +
               2 * resourceValue;
           }
         }
@@ -96,9 +103,11 @@ class Tile extends Entity
 
     if(resourceValue <= 0) {
       resourceValue = 0;
-      if(facility != null && (facility.online && !facility.positive) && facility.type != "windmill") {
+      if(facility != null && (facility.online && !facility.positive) &&
+         facility.type != "windmill" && facility.type != "recycle") {
         Explosion.at(facility.x+25, facility.y+25);
         facility.online = facility.positive || false;
+        boom.play(0.5);
       }
     }
 

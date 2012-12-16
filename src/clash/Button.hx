@@ -119,8 +119,10 @@ class Button extends ClashWidget
     switch (state) {
     case NORMAL:
       graphic = _normal;
+      _label.text = _label.text.toLowerCase();
     case HOVER:
       graphic = _hover;
+      _label.text = _label.text.toUpperCase();
     case DOWN:
       graphic = _down;
     }

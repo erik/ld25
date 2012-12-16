@@ -41,6 +41,6 @@ class RecyclingCenter extends Facility
 
   public override function getUpkeep()
   {
-    return 150;
+    return 50;
   }
 }

@@ -5,7 +5,7 @@ import com.haxepunk.graphics.TiledSpritemap;
 
 class Windmill extends Facility
 {
-  public static inline var BUILD_COST : Int = 250;
+  public static inline var BUILD_COST : Int = 150;
 
   var spritemap : TiledSpritemap;
 
@@ -32,6 +32,6 @@ class Windmill extends Facility
 
   public override function getUpkeep()
   {
-    return 50;
+    return 5;
   }
 }

@@ -6,7 +6,7 @@ import com.haxepunk.graphics.Emitter;
 
 class Refinery extends Facility
 {
-  public static inline var BUILD_COST : Int = 750;
+  public static inline var BUILD_COST : Int = 2500;
 
   var spritemap : TiledSpritemap;
 
@@ -32,8 +32,7 @@ class Refinery extends Facility
 
   public override function particleEffect()
   {
-    for(i in 0...3)
-      emitter.emit('smoke', width/2, 10);
+    emitter.emit('smoke', width/2, 10);
   }
 
   public override function update()

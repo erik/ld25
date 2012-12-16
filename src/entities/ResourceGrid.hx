@@ -29,5 +29,7 @@ class ResourceGrid extends Entity
         cast(HXP.world, GameWorld).totRes += tiles[i][j].resourceValue;
       }
     }
+
+    cast(HXP.world, GameWorld).totRes = Std.int(cast(HXP.world, GameWorld).totRes/10);
   }
 }

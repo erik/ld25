@@ -31,8 +31,23 @@ class Probe extends Entity
 
   public function setEnd(x, y : Float)
   {
-    endPos.x = x;
-    endPos.y = y;
+    if(x < this.x || y < this.y) {
+      if(y < this.y) {
+        endPos.y = this.y;
+        var oy = this.y;
+        this.y = y;
+        y = oy;
+      }
+      if(x < this.x) {
+        endPos.x = this.x;
+        var ox = this.x;
+        this.x = x;
+        x = ox;
+      }
+    } else {
+      endPos.x = x;
+      endPos.y = y;
+    }
 
     graphic = new Image(new BitmapData(
                           Std.int(Math.abs(endPos.x-this.x)+1),
