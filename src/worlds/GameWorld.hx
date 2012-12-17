@@ -236,7 +236,7 @@ class GameWorld extends World
           switch(mouseState) {
           case PLACE_REFINERY:
             if(collidePoint("collide", mouseX, mouseY) != null) {
-              if(coffers - Refinery.BUILD_COST > 0) {
+              if(coffers - Refinery.BUILD_COST >= 0) {
                 if(curTile != null && curTile.facility == null) {
                   var fac = new Refinery(curTile.x, curTile.y);
                   curTile.setFac(fac);
@@ -252,7 +252,7 @@ class GameWorld extends World
             mouseState = FREE;
           case PLACE_RECYCLING:
             if(collidePoint("collide", mouseX, mouseY) != null) {
-              if(coffers - RecyclingCenter.BUILD_COST > 0) {
+              if(coffers - RecyclingCenter.BUILD_COST >= 0) {
                 if(curTile != null && curTile.facility == null) {
                   var fac = new RecyclingCenter(curTile.x, curTile.y);
                   curTile.setFac(fac);
@@ -268,7 +268,7 @@ class GameWorld extends World
             mouseState = FREE;
           case PLACE_OILRIG:
             if(collidePoint("collide", mouseX, mouseY) != null) {
-              if(coffers - OilRig.BUILD_COST > 0) {
+              if(coffers - OilRig.BUILD_COST >= 0) {
                 if(curTile != null && curTile.facility == null) {
                   var fac = new OilRig(Std.random(100), curTile.x, curTile.y);
                   curTile.setFac(fac);
@@ -284,7 +284,7 @@ class GameWorld extends World
             mouseState = FREE;
           case PLACE_WINDMILL:
             if(collidePoint("collide", mouseX, mouseY) != null) {
-              if(coffers - Windmill.BUILD_COST > 0) {
+              if(coffers - Windmill.BUILD_COST >= 0) {
                 if(curTile != null && curTile.facility == null) {
                   var fac = new Windmill(curTile.x, curTile.y);
                   curTile.setFac(fac);
